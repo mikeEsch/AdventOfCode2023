@@ -37,31 +37,47 @@ void parseLine(char *p_line, size_t len) {
                 printf("%d ", firstNum);
             }
             ++num;
-        } else if ((value >= 'A' && value <= 'Z')
-            || (value >= 'a' && value <= 'z')) {
-            unsigned char n=0;
-            for(; n<9; n++) {
-                const char* p_number = numbers[n];
-                size_t l = strlen(p_number);
-                if(l <= (len - i)) {
-                    unsigned char m=0;
-                    for(; m<l; m++) {
-                        if(p_number[m] != p_line[i+m]) {
+        } else if (value >= 'a' && value <= 'z') {
+            unsigned int rowCheck = 0x01FF;
+            size_t remain = len - i;               
+            unsigned char col = 0;
+            char found = -1;
+            //printf("\n%s\n", &p_line[i]);
+            while ((found < 0) && rowCheck && (remain >= 0)) {
+                //printf("col: %d\n", col);
+                unsigned int rowMask = 0x1;
+                for (unsigned char row = 0; row < 9; row++) {
+                    if ((rowCheck & rowMask)) {
+                        //printf("row: %d check: %x mask: %x num: %s ", row, rowCheck, rowMask, numbers[row]);
+                        const char * p_number = numbers[row];
+                        if ((col < strlen(p_number))) {
+                            if (p_number[col] != p_line[i+col]) {
+                                rowCheck &= ~rowMask;
+                                //printf("No match!\n");
+                            } else {
+                                //printf("Match!\n");
+                            }
+                        } else {
+                            found = (char)row+1;
+                            //printf("Found: %d\n", found);
                             break;
                         }
                     }
-                    if(m == l) {
-                        if (num > 0) {
-                            lastNum = n+1;
-                            printf("%d ", lastNum);
-                        } else {
-                            firstNum = n+1;
-                            printf("%d ", firstNum);
-                        }
-                        ++num;
-                        break;
-                    }
+                    rowMask <<= 1;
                 }
+                col++;
+                remain--;
+            }
+
+            if (found >= 0) {
+                if (num > 0) {
+                    lastNum = (unsigned char)found;
+                    printf("%d ", lastNum);
+                } else {
+                    firstNum = (unsigned char)found;
+                    printf("%d ", firstNum);
+                }
+                num++;
             }
         }
     }
