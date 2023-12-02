@@ -3,3 +3,7 @@ cmake_install.cmake
 CMakeCache.txt
 Makefile
 build/**
+p1
+p2
+input.txt
+out.txt
